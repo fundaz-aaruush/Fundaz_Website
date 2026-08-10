@@ -11,10 +11,10 @@ import { LETTER_PATHS } from "@/lib/letterPaths";
 
 const EMPTY_SIGNUP = { name: "", email: "", regNo: "", phone: "", course: "", password: "", confirmPassword: "" };
 const EMPTY_LOGIN  = { identifier: "", password: "" };
-const EMPTY_COMPLETE = { regNo: "", phone: "", course: "" };
+const EMPTY_COMPLETE = { name: "", regNo: "", phone: "", course: "" };
 
 export default function AuthGatePage() {
-  const { user, signup, login, loginWithGoogle, completeGoogleProfile, loginAsGuest } = useAuth();
+  const { user, signup, login, loginWithGoogle, completeGoogleProfile } = useAuth();
   const [tab, setTab] = useState(user?.needsProfile ? "complete_profile" : "login");
   
   const [signupForm, setSignupForm] = useState(EMPTY_SIGNUP);
@@ -27,8 +27,10 @@ export default function AuthGatePage() {
     if (user?.needsProfile) {
       setTab("complete_profile");
       setErrors({});
+      // Pre-fill name from Google account
+      setCompleteForm((f) => ({ ...f, name: user.displayName || "" }));
     }
-  }, [user?.needsProfile]);
+  }, [user?.needsProfile, user?.displayName]);
 
   const setS = (k) => (e) => setSignupForm((f) => ({ ...f, [k]: e.target.value }));
   const setL = (k) => (e) => setLoginForm((f) => ({ ...f, [k]: e.target.value }));
@@ -58,6 +60,7 @@ export default function AuthGatePage() {
 
   const validateComplete = () => {
     const errs = {};
+    if (!completeForm.name.trim())  errs.name  = "Required";
     if (!completeForm.regNo.trim()) errs.regNo = "Required";
     if (!/^\d{10}$/.test(completeForm.phone.replace(/\s/g,""))) errs.phone = "10-digit number";
     if (!completeForm.course.trim()) errs.course= "Required";
@@ -100,7 +103,7 @@ export default function AuthGatePage() {
     setLoading(true);
     try {
       await completeGoogleProfile({
-        name: user.displayName || "Unknown",
+        name: completeForm.name || user.displayName || "Unknown",
         email: user.email,
         regNo: completeForm.regNo,
         phone: completeForm.phone,
@@ -384,8 +387,21 @@ export default function AuthGatePage() {
             >
               <div style={{ textAlign: "center", marginBottom: "1rem" }}>
                 <p className="auth-gate-label" style={{ fontSize: "0.9rem" }}>
-                  Please complete your profile to continue.
+                  One more step — complete your SRMIST profile.
                 </p>
+              </div>
+
+              <div className="auth-gate-field">
+                <label className="auth-gate-label" htmlFor="cp-name">Full Name</label>
+                <input
+                  id="cp-name"
+                  className={`auth-gate-input${errors.name ? " auth-gate-input--error" : ""}`}
+                  placeholder="Ada Lovelace"
+                  value={completeForm.name}
+                  onChange={setC("name")}
+                  disabled={loading}
+                />
+                {errors.name && <p className="auth-gate-error">{errors.name}</p>}
               </div>
 
               <div className="auth-gate-field">

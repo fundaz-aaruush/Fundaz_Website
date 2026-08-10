@@ -83,6 +83,13 @@ export const RegisterDialog = ({ event, open, onOpenChange }) => {
     e.preventDefault();
     if (!validate()) return;
     
+    // Guard: must have a real authenticated UID
+    const userId = user?.uid;
+    if (!userId) {
+      toast.error("Authentication required", { description: "Please log in to register for events." });
+      return;
+    }
+
     setLoading(true);
     try {
       const registration = {
@@ -92,7 +99,7 @@ export const RegisterDialog = ({ event, open, onOpenChange }) => {
         teamSize,
         teamLead,
         members,
-        registeredBy: user?.uid || user?.id || "guest",
+        registeredBy: userId,
         at: new Date().toISOString(),
       };
 
@@ -100,18 +107,14 @@ export const RegisterDialog = ({ event, open, onOpenChange }) => {
       const collectionName = `registrations_${event?.id || 'unknown'}`;
       const { collection, addDoc, getDocs, query, where } = await import("firebase/firestore");
       const { db } = await import("../firebase");
-      
-      const userId = user?.uid || user?.id || "guest";
 
       // Check for duplicate registration by this user for THIS specific event
-      if (userId !== "guest") {
-        const q = query(collection(db, collectionName), where("registeredBy", "==", userId));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          toast.error("Already registered", { description: "You have already registered a team for this event." });
-          setLoading(false);
-          return;
-        }
+      const q = query(collection(db, collectionName), where("registeredBy", "==", userId));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        toast.error("Already registered", { description: "You have already registered a team for this event." });
+        setLoading(false);
+        return;
       }
 
       await addDoc(collection(db, collectionName), registration);

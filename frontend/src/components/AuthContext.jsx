@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { auth, db } from "../firebase";
 import {
   createUserWithEmailAndPassword,
@@ -27,31 +27,54 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // When signup() already wrote the Firestore doc and set the user directly,
+  // skip the redundant fetch in the onAuthStateChanged callback.
+  const skipNextFetchRef = useRef(false);
 
   // Monitor auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // If signup() already set the user with fresh Firestore data, skip re-fetching
+        if (skipNextFetchRef.current) {
+          skipNextFetchRef.current = false;
+          setLoading(false);
+          return;
+        }
         try {
-          // Slight delay to prevent race condition if they just signed up via Email/Password
-          await new Promise((resolve) => setTimeout(resolve, 800));
-
-          // Fetch extra profile data from firestore
+          // Fetch extra profile data from Firestore
           const docRef = doc(db, "users", firebaseUser.uid);
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
             setUser({ ...firebaseUser, ...docSnap.data(), isGuest: false, needsProfile: false });
           } else {
-            // If no doc exists, they might have just logged in with Google for the first time
+            // No doc — first-time Google sign-in, needs profile completion
             setUser({ ...firebaseUser, isGuest: false, needsProfile: true });
           }
         } catch (error) {
           console.error("Error fetching user data from Firestore:", error);
-          // If Firestore is not enabled or permission denied, sign out so they don't get stuck
-          await signOut(auth);
-          setUser(null);
+          const isPermissionError = error?.code === "permission-denied";
+          const isOffline =
+            error?.code === "unavailable" ||
+            (error?.message || "").toLowerCase().includes("offline") ||
+            (error?.message || "").toLowerCase().includes("failed to get document");
+
+          if (isPermissionError) {
+            // Genuinely not allowed — sign out
+            await signOut(auth);
+            setUser(null);
+          } else if (isOffline) {
+            // Network issue — keep the user logged in with basic Auth data
+            // They can still navigate; Firestore data will sync when back online
+            setUser({ ...firebaseUser, isGuest: false, needsProfile: false });
+          } else {
+            // Unknown error — sign out to be safe
+            await signOut(auth);
+            setUser(null);
+          }
         }
+      } else {
         setUser(null);
       }
       setLoading(false);
@@ -64,26 +87,32 @@ export const AuthProvider = ({ children }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
     const { password, confirmPassword, ...profileData } = userData;
     
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      ...profileData,
-      createdAt: new Date().toISOString(),
+    const fullProfile = { ...profileData, createdAt: new Date().toISOString() };
+    await setDoc(doc(db, "users", userCredential.user.uid), fullProfile);
+    
+    // Set user directly — doc is guaranteed written.
+    // Tell the onAuthStateChanged listener to skip its own Firestore fetch
+    // since we already have fresh data and the user is set.
+    skipNextFetchRef.current = true;
+    setUser({
+      ...userCredential.user,
+      ...fullProfile,
+      isGuest: false,
+      needsProfile: false,
     });
     
-    sessionStorage.removeItem("fz_preloaded");
     return userCredential.user;
   }, []);
 
   const login = useCallback(async (credentials) => {
     // Note: Since Firebase Auth uses email, users must enter their email as identifier.
     const userCredential = await signInWithEmailAndPassword(auth, credentials.identifier, credentials.password);
-    sessionStorage.removeItem("fz_preloaded");
     return userCredential.user;
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    sessionStorage.removeItem("fz_preloaded");
     return result.user;
   }, []);
 

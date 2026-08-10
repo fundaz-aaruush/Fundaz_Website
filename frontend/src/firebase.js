@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -16,6 +16,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Force long-polling instead of WebSockets to fix "client is offline" errors
+// (WebChannel/WebSocket can be blocked in certain networks/environments)
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+});
 
 export default app;
