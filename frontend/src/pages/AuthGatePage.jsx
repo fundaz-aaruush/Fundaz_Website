@@ -14,7 +14,7 @@ const EMPTY_LOGIN  = { identifier: "", password: "" };
 const EMPTY_COMPLETE = { name: "", regNo: "", phone: "", course: "" };
 
 export default function AuthGatePage() {
-  const { user, signup, login, loginWithGoogle, completeGoogleProfile } = useAuth();
+  const { user, signup, login, loginWithGoogle, completeGoogleProfile, logout } = useAuth();
   const [tab, setTab] = useState(user?.needsProfile ? "complete_profile" : "login");
   
   const [signupForm, setSignupForm] = useState(EMPTY_SIGNUP);
@@ -23,14 +23,19 @@ export default function AuthGatePage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Switch to profile-completion form whenever the auth state indicates it's needed.
+  // Depends on uid so it re-runs if a different Google account signs in.
   useEffect(() => {
     if (user?.needsProfile) {
       setTab("complete_profile");
       setErrors({});
-      // Pre-fill name from Google account
-      setCompleteForm((f) => ({ ...f, name: user.displayName || "" }));
+      // Pre-fill name (and phone/email if available) from Google account
+      setCompleteForm((f) => ({
+        ...f,
+        name: f.name || user.displayName || "",
+      }));
     }
-  }, [user?.needsProfile, user?.displayName]);
+  }, [user?.uid, user?.needsProfile, user?.displayName]);
 
   const setS = (k) => (e) => setSignupForm((f) => ({ ...f, [k]: e.target.value }));
   const setL = (k) => (e) => setLoginForm((f) => ({ ...f, [k]: e.target.value }));
@@ -120,9 +125,20 @@ export default function AuthGatePage() {
   const handleGoogleClick = async () => {
     setLoading(true);
     try {
-      await loginWithGoogle();
+      const { isNewUser } = await loginWithGoogle();
+      // For new users: onAuthStateChanged will set needsProfile=true which
+      // triggers the useEffect above. For extra reliability, also set the tab
+      // directly here so the form appears immediately without waiting for
+      // the Firestore fetch to complete.
+      if (isNewUser) {
+        setTab("complete_profile");
+      }
+      // Returning users: onAuthStateChanged will fetch their Firestore profile
+      // and set needsProfile=false → App.js will unmount this page.
     } catch (err) {
-      toast.error("Google sign-in failed", { description: err.message });
+      if (err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") {
+        toast.error("Google sign-in failed", { description: err.message });
+      }
     } finally {
       setLoading(false);
     }
@@ -386,9 +402,14 @@ export default function AuthGatePage() {
               data-testid="auth-gate-complete-form"
             >
               <div style={{ textAlign: "center", marginBottom: "1rem" }}>
-                <p className="auth-gate-label" style={{ fontSize: "0.9rem" }}>
+                <p className="auth-gate-label" style={{ fontSize: "0.9rem", marginBottom: "0.35rem" }}>
                   One more step — complete your SRMIST profile.
                 </p>
+                {user?.email && (
+                  <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.1rem" }}>
+                    Signed in as <strong style={{ color: "rgba(255,255,255,0.65)" }}>{user.email}</strong>
+                  </p>
+                )}
               </div>
 
               <div className="auth-gate-field">
@@ -446,6 +467,22 @@ export default function AuthGatePage() {
               <button className="auth-gate-submit" type="submit" disabled={loading}>
                 {loading ? "Saving…" : "Complete Registration →"}
               </button>
+
+              <p className="auth-gate-switch">
+                Wrong account?{" "}
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={async () => {
+                    await logout();
+                    setTab("login");
+                    setCompleteForm({ name: "", regNo: "", phone: "", course: "" });
+                    setErrors({});
+                  }}
+                >
+                  Sign out and switch
+                </button>
+              </p>
             </motion.form>
           )}
         </AnimatePresence>

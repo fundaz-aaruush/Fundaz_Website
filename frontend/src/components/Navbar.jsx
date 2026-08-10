@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Menu, User, LogOut } from "lucide-react";
+import { Menu, User, LogOut, UserPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { AtomLogo } from "@/components/AtomLogo";
@@ -8,12 +8,14 @@ import { LETTERS } from "@/lib/letterPaths";
 import { useTransitionNav } from "@/components/PageTransition";
 import { useAuth } from "@/components/AuthContext";
 import { AuthDialog } from "@/components/AuthDialog";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { cn } from "@/lib/utils";
 
 export const Navbar = ({ minimal = false }) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
   const { go } = useTransitionNav();
   const { pathname } = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
@@ -89,9 +91,18 @@ export const Navbar = ({ minimal = false }) => {
                       <Button variant="ghostSilver" size="icon" className="h-9 w-9" data-testid="nav-user-button">
                         <User className="h-4 w-4" />
                       </Button>
-                      <div className="invisible absolute right-0 top-full mt-1 w-48 rounded-lg border border-border bg-card/95 p-2 opacity-0 shadow-elegant backdrop-blur-xl group-hover:visible group-hover:opacity-100" style={{ transition: "opacity 0.2s ease, visibility 0.2s ease" }}>
-                        <p className="truncate px-2 py-1.5 text-xs font-semibold text-foreground">{user.name}</p>
+                      <div className="invisible absolute right-0 top-full mt-1 w-56 rounded-lg border border-border bg-card/95 p-2 opacity-0 shadow-elegant backdrop-blur-xl group-hover:visible group-hover:opacity-100" style={{ transition: "opacity 0.2s ease, visibility 0.2s ease" }}>
+                        <p className="truncate px-2 py-1.5 text-xs font-semibold text-foreground">{user.name || user.displayName}</p>
                         <p className="truncate px-2 pb-2 text-[10px] text-muted-foreground">{user.email}</p>
+                        <div className="h-px bg-border mb-1" />
+                        <button
+                          onClick={() => setEditProfileOpen(true)}
+                          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
+                          style={{ transition: "background-color 0.2s ease, color 0.2s ease" }}
+                          data-testid="nav-edit-profile"
+                        >
+                          <UserPen className="h-3 w-3" /> Edit Profile
+                        </button>
                         <button
                           onClick={logout}
                           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -143,9 +154,12 @@ export const Navbar = ({ minimal = false }) => {
                   <div className="mt-6 border-t border-border pt-4">
                     {isAuthenticated ? (
                       <div className="flex flex-col gap-2 px-3">
-                        <p className="text-sm font-semibold text-foreground">{user.name}</p>
+                        <p className="text-sm font-semibold text-foreground">{user.name || user.displayName}</p>
                         <p className="text-xs text-muted-foreground">{user.email}</p>
-                        <Button variant="ghostSilver" size="sm" onClick={logout} className="mt-2 justify-start" data-testid="mobile-logout">
+                        <Button variant="ghostSilver" size="sm" onClick={() => { setOpen(false); setEditProfileOpen(true); }} className="mt-1 justify-start" data-testid="mobile-edit-profile">
+                          <UserPen className="mr-2 h-3 w-3" /> Edit Profile
+                        </Button>
+                        <Button variant="ghostSilver" size="sm" onClick={logout} className="justify-start" data-testid="mobile-logout">
                           <LogOut className="mr-2 h-3 w-3" /> Log out
                         </Button>
                       </div>
@@ -168,6 +182,7 @@ export const Navbar = ({ minimal = false }) => {
       </header>
 
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
+      <EditProfileDialog open={editProfileOpen} onOpenChange={setEditProfileOpen} />
     </>
   );
 };
