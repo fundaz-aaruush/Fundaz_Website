@@ -7,8 +7,27 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  getAdditionalUserInfo,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+
+// ── Profile cache helpers ──────────────────────────────────────────────────
+const CACHE_KEY = "fundaz_profile";
+const saveProfileCache = (uid, data) => {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ uid, ...data })); } catch {}
+};
+const loadProfileCache = (uid) => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.uid === uid ? parsed : null;   // only use if UID matches
+  } catch { return null; }
+};
+const clearProfileCache = () => {
+  try { localStorage.removeItem(CACHE_KEY); } catch {}
+};
+// ──────────────────────────────────────────────────────────────────────────
 
 const AuthContext = createContext({
   user: null,
@@ -27,29 +46,57 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  // When signup() already wrote the Firestore doc and set the user directly,
-  // skip the redundant fetch in the onAuthStateChanged callback.
   const skipNextFetchRef = useRef(false);
+  const isNewGoogleUserRef = useRef(false);
 
-  // Monitor auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // If signup() already set the user with fresh Firestore data, skip re-fetching
+        // Email signup already set user + wrote Firestore doc — skip re-fetch
         if (skipNextFetchRef.current) {
           skipNextFetchRef.current = false;
           setLoading(false);
           return;
         }
+
+        // Brand-new Google user — go straight to profile form (no Firestore needed)
+        if (isNewGoogleUserRef.current) {
+          isNewGoogleUserRef.current = false;
+          setUser({ ...firebaseUser, isGuest: false, needsProfile: true });
+          setLoading(false);
+          return;
+        }
+
+        // ── FAST PATH: load from cache immediately (zero network wait) ──
+        const cached = loadProfileCache(firebaseUser.uid);
+        if (cached) {
+          const { uid: _uid, ...profileData } = cached;
+          setUser({ ...firebaseUser, ...profileData, isGuest: false, needsProfile: false });
+          setLoading(false);
+          // Silently refresh from Firestore in background (no spinner shown)
+          getDoc(doc(db, "users", firebaseUser.uid))
+            .then((snap) => {
+              if (snap.exists()) {
+                const fresh = snap.data();
+                saveProfileCache(firebaseUser.uid, fresh);
+                setUser((prev) => ({ ...prev, ...fresh }));
+              }
+            })
+            .catch(() => {}); // ignore background refresh errors
+          return;
+        }
+
+        // ── SLOW PATH: no cache — fetch from Firestore (first visit) ──
         try {
-          // Fetch extra profile data from Firestore
           const docRef = doc(db, "users", firebaseUser.uid);
           const docSnap = await getDoc(docRef);
-          
+
           if (docSnap.exists()) {
-            setUser({ ...firebaseUser, ...docSnap.data(), isGuest: false, needsProfile: false });
+            const profileData = docSnap.data();
+            saveProfileCache(firebaseUser.uid, profileData);
+            setUser({ ...firebaseUser, ...profileData, isGuest: false, needsProfile: false });
           } else {
-            // No doc — first-time Google sign-in, needs profile completion
+            // No doc — needs profile completion
             setUser({ ...firebaseUser, isGuest: false, needsProfile: true });
           }
         } catch (error) {
@@ -61,15 +108,11 @@ export const AuthProvider = ({ children }) => {
             (error?.message || "").toLowerCase().includes("failed to get document");
 
           if (isPermissionError) {
-            // Genuinely not allowed — sign out
             await signOut(auth);
             setUser(null);
           } else if (isOffline) {
-            // Network issue — keep the user logged in with basic Auth data
-            // They can still navigate; Firestore data will sync when back online
             setUser({ ...firebaseUser, isGuest: false, needsProfile: false });
           } else {
-            // Unknown error — sign out to be safe
             await signOut(auth);
             setUser(null);
           }
@@ -86,13 +129,11 @@ export const AuthProvider = ({ children }) => {
   const signup = useCallback(async (userData) => {
     const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
     const { password, confirmPassword, ...profileData } = userData;
-    
+
     const fullProfile = { ...profileData, createdAt: new Date().toISOString() };
     await setDoc(doc(db, "users", userCredential.user.uid), fullProfile);
-    
-    // Set user directly — doc is guaranteed written.
-    // Tell the onAuthStateChanged listener to skip its own Firestore fetch
-    // since we already have fresh data and the user is set.
+
+    saveProfileCache(userCredential.user.uid, fullProfile);
     skipNextFetchRef.current = true;
     setUser({
       ...userCredential.user,
@@ -100,37 +141,38 @@ export const AuthProvider = ({ children }) => {
       isGuest: false,
       needsProfile: false,
     });
-    
+
     return userCredential.user;
   }, []);
 
   const login = useCallback(async (credentials) => {
-    // Note: Since Firebase Auth uses email, users must enter their email as identifier.
     const userCredential = await signInWithEmailAndPassword(auth, credentials.identifier, credentials.password);
     return userCredential.user;
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
     const result = await signInWithPopup(auth, provider);
+    const info = getAdditionalUserInfo(result);
+    if (info?.isNewUser) {
+      isNewGoogleUserRef.current = true;
+    }
     return result.user;
   }, []);
 
   const completeGoogleProfile = useCallback(async (additionalData) => {
     if (!auth.currentUser) throw new Error("No authenticated user");
-    
-    await setDoc(doc(db, "users", auth.currentUser.uid), {
-      ...additionalData,
-      createdAt: new Date().toISOString(),
-    });
-    
-    // Update local state to reflect complete profile
-    setUser((prev) => ({ ...prev, ...additionalData, needsProfile: false }));
+
+    const profileData = { ...additionalData, createdAt: new Date().toISOString() };
+    await setDoc(doc(db, "users", auth.currentUser.uid), profileData);
+
+    saveProfileCache(auth.currentUser.uid, profileData);
+    setUser((prev) => ({ ...prev, ...profileData, needsProfile: false }));
   }, []);
 
-
-
   const logout = useCallback(async () => {
+    clearProfileCache();
     await signOut(auth);
     setUser(null);
   }, []);
@@ -149,7 +191,8 @@ export const AuthProvider = ({ children }) => {
         logout,
       }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
+

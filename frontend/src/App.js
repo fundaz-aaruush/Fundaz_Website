@@ -15,11 +15,42 @@ import AuthGatePage from "@/pages/AuthGatePage";
 
 /*
   Auth-gated shell:
+  - loading         → show a branded splash screen (no more blank black screen)
   - Not authenticated → show AuthGatePage (fullscreen login/signup)
-  - Authenticated     → normal site with preloader → landing
+  - needsProfile    → show AuthGatePage (Google profile completion)
+  - Authenticated   → normal site
 */
 function AppShell() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
+
+  // ── Loading splash ── shown while Firebase verifies the session
+  if (loading) {
+    return (
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        background: "var(--background, #090912)",
+        gap: "1rem",
+      }}>
+        <div style={{
+          fontSize: "2.5rem",
+          animation: "auth-pulse 1.6s ease-in-out infinite",
+          color: "var(--primary, #a78bfa)",
+        }}>π</div>
+        <p style={{
+          fontFamily: "monospace",
+          fontSize: "0.75rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.35)",
+        }}>Verifying session…</p>
+        <style>{`@keyframes auth-pulse { 0%,100%{opacity:.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }`}</style>
+      </div>
+    );
+  }
 
   if (!isAuthenticated || user?.needsProfile) {
     return (
