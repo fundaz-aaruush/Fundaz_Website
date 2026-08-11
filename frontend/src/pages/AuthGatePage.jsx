@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthContext";
@@ -15,27 +15,21 @@ const EMPTY_COMPLETE = { name: "", regNo: "", phone: "", course: "" };
 
 export default function AuthGatePage() {
   const { user, signup, login, loginWithGoogle, completeGoogleProfile, logout } = useAuth();
+  // AuthContext sets loading=true during the Firestore fetch, which unmounts this component.
+  // When it remounts, user?.needsProfile is already set, so this initial value is correct.
   const [tab, setTab] = useState(user?.needsProfile ? "complete_profile" : "login");
-  
+
   const [signupForm, setSignupForm] = useState(EMPTY_SIGNUP);
   const [loginForm, setLoginForm] = useState(EMPTY_LOGIN);
-  const [completeForm, setCompleteForm] = useState(EMPTY_COMPLETE);
+  // Pre-fill name from Google displayName if available
+  const [completeForm, setCompleteForm] = useState({
+    name: user?.displayName || "",
+    regNo: "",
+    phone: "",
+    course: "",
+  });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
-  // Switch to profile-completion form whenever the auth state indicates it's needed.
-  // Depends on uid so it re-runs if a different Google account signs in.
-  useEffect(() => {
-    if (user?.needsProfile) {
-      setTab("complete_profile");
-      setErrors({});
-      // Pre-fill name (and phone/email if available) from Google account
-      setCompleteForm((f) => ({
-        ...f,
-        name: f.name || user.displayName || "",
-      }));
-    }
-  }, [user?.uid, user?.needsProfile, user?.displayName]);
 
   const setS = (k) => (e) => setSignupForm((f) => ({ ...f, [k]: e.target.value }));
   const setL = (k) => (e) => setLoginForm((f) => ({ ...f, [k]: e.target.value }));
@@ -125,16 +119,13 @@ export default function AuthGatePage() {
   const handleGoogleClick = async () => {
     setLoading(true);
     try {
-      const { isNewUser } = await loginWithGoogle();
-      // For new users: onAuthStateChanged will set needsProfile=true which
-      // triggers the useEffect above. For extra reliability, also set the tab
-      // directly here so the form appears immediately without waiting for
-      // the Firestore fetch to complete.
-      if (isNewUser) {
-        setTab("complete_profile");
-      }
-      // Returning users: onAuthStateChanged will fetch their Firestore profile
-      // and set needsProfile=false → App.js will unmount this page.
+      await loginWithGoogle();
+      // AuthContext will:
+      //  - set loading=true while querying Firestore
+      //  - set user.needsProfile=true if no profile doc exists
+      //  - set loading=false when done
+      // App.js will then either show the loading spinner → remount AuthGatePage
+      // (with profile form) or unmount it entirely (returning user with profile).
     } catch (err) {
       if (err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") {
         toast.error("Google sign-in failed", { description: err.message });

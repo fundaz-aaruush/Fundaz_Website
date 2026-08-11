@@ -78,7 +78,11 @@ export const AuthProvider = ({ children }) => {
           return;
         }
 
-        // ── SLOW PATH: no cache — fetch from Firestore (first visit) ──
+        // ── SLOW PATH: no cache — fetch from Firestore (first visit / no cache) ──
+        // Signal loading so the UI shows a spinner (not the login page) during the fetch.
+        // When setLoading(false) is called below, AuthGatePage will remount fresh with
+        // the correct initial tab (complete_profile or the main app).
+        setLoading(true);
         try {
           const docRef = doc(db, "users", firebaseUser.uid);
           const docSnap = await getDoc(docRef);
@@ -88,7 +92,7 @@ export const AuthProvider = ({ children }) => {
             saveProfileCache(firebaseUser.uid, profileData);
             setUser({ ...firebaseUser, ...profileData, isGuest: false, needsProfile: false });
           } else {
-            // No doc found — this is a new Google user who hasn't completed their profile yet
+            // No doc found — new Google user who hasn't completed their profile yet
             setUser({ ...firebaseUser, isGuest: false, needsProfile: true });
           }
         } catch (error) {
@@ -102,8 +106,7 @@ export const AuthProvider = ({ children }) => {
             // Offline — let them in without profile (best-effort)
             setUser({ ...firebaseUser, isGuest: false, needsProfile: false });
           } else {
-            // For any other error (including permission-denied), show profile form
-            // rather than signing the user out — they may be a new Google user
+            // For any other error, show profile form rather than signing the user out
             setUser({ ...firebaseUser, isGuest: false, needsProfile: true });
           }
         }
