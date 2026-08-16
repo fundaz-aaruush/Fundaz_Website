@@ -43,7 +43,8 @@ export const TransitionProvider = ({ children }) => {
     let t;
     if (state.phase === "cover") {
       t = setTimeout(() => {
-        navigate(state.idx < 0 ? "/" : `/${LETTERS[state.idx].id}`);
+        const targetPath = state.idx < 0 ? "/home" : `/${LETTERS[state.idx].id}`;
+        navigate(targetPath);
         window.scrollTo({ top: 0, behavior: "instant" });
         setState((s) => ({ ...s, phase: "hold" }));
       }, COVER_MS);
