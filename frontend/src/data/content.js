@@ -280,9 +280,9 @@ export const ZENITH = {
     "Over the years the FUNDAZ stage has hosted quizmasters, scientists, storytellers and champions. The Zenith wall remembers them.",
   guests: [
     { name: "Robin Singh", tag: "Astrophysicist & Science Communicator", year: "2008", photo: P.p1, quote: "A crowd that heckles you with better answers — I've never had more fun on stage." },
-    { name: "Chetan Bhagat", tag: "National Quiz Circuit Champion", year: "2010", photo: P.p4, quote: "The Main Quiz finale here is as sharp as anything on the national circuit." },
-    { name: "Rajat Kapoor", tag: "Puzzle Designer, Escape Labs", year: "2014", photo: P.p5, quote: "Their Mystery Room writing team could work in the industry tomorrow." },
+    { name: "Chetan Bhagat", tag: "National Quiz Circuit Champion", year: "2010", photo: "/images/chetan-bhagat.png", quote: "The Main Quiz finale here is as sharp as anything on the national circuit." },
+    { name: "Rajat Kapoor", tag: "Puzzle Designer, Escape Labs", year: "2014", photo: "/images/rajat-kapoor.png", quote: "Their Mystery Room writing team could work in the industry tomorrow." },
     { name: "General Dr. VK Singh", tag: "Mathematician & Author", year: "2017", photo: P.p7, quote: "FUNDAZ proves the fastest way to teach math is to hide it inside a game." },
-    { name: "T K Padmanabham", tag: "QuizMaster", year: "2025", photo: P.p7, quote: "FUNDAZ proves the fastest way to teach math is to hide it inside a game." },
+    { name: "T K Padmanabham", tag: "QuizMaster", year: "2025", photo: "/images/tk-padmanabham.png", quote: "FUNDAZ proves the fastest way to teach math is to hide it inside a game." },
   ],
 };
