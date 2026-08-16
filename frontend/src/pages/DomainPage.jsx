@@ -202,117 +202,256 @@ export default function DomainPage() {
   };
 
   return (
-    <LetterPageShell
-      idx={3}
-      heroImage={IMAGES.skeletonKey}
-      title={<span>Three events. Three days. <span className="text-gradient-silver">Three rounds each.</span></span>}
-      intro={DOMAIN_EVENTS.intro}
-    >
-      <PageSection data-testid="domain-current">
-        <motion.div {...fadeUp} transition={{ duration: 0.7 }}>
-          <Tabs defaultValue={DOMAIN_EVENTS.current[0].id} className="w-full">
-            <TabsList className="grid h-auto w-full max-w-2xl grid-cols-3 border border-border bg-secondary/60">
-              {DOMAIN_EVENTS.current.map((ev) => (
-                <TabsTrigger
-                  key={ev.id}
-                  value={ev.id}
-                  className="whitespace-normal px-2 py-2 font-mono-tech text-[10px] uppercase tracking-[0.12em] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:text-xs"
-                  data-testid={`domain-tab-${ev.id}`}
-                >
-                  {ev.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {DOMAIN_EVENTS.current.map((ev) => (
-              <TabsContent key={ev.id} value={ev.id} className="mt-10" data-testid={`domain-event-panel-${ev.id}`}>
-                <div className="flex flex-wrap items-center gap-3">
-                  <Badge className="bg-gradient-silver font-mono-tech text-[10px] uppercase tracking-[0.2em] text-primary-foreground">2025 Edition</Badge>
-                  <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <CalendarDays className="h-3.5 w-3.5" />{ev.dates} · one round per day
-                  </span>
-                </div>
-                <h2 className="mt-5 font-display text-3xl font-bold text-foreground">{ev.name}</h2>
-                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">{ev.description}</p>
-
-                {/* 3-state pixel-transition image viewer */}
-                <div className="mt-10">
-                  <PixelCycleViewer
-                    key={`${ev.id}-${activeRounds[ev.id] || 0}`}
-                    rounds={ev.rounds}
-                    activeRound={activeRounds[ev.id] || 0}
-                  />
-                </div>
-
-                {/* horizontal round timeline */}
-                <div className="relative mt-2 grid gap-10 md:grid-cols-3 md:gap-6">
-                  <span className="absolute left-4 top-0 h-full w-px bg-border md:left-0 md:top-4 md:h-px md:w-full" />
-                  {ev.rounds.map((r, i) => (
-                    <motion.div
-                      key={r.day}
-                      {...fadeUp}
-                      transition={{ duration: 0.55, delay: i * 0.1 }}
-                      className={`relative cursor-pointer pl-14 md:pl-0 md:pt-12 ${activeRounds[ev.id] === i ? "" : "opacity-60 hover:opacity-80"}`}
-                      style={{ transition: "opacity 0.3s ease" }}
-                      onClick={() => setActiveRound(ev.id, i)}
-                      data-testid={`domain-round-${ev.id}-${i}`}
+    <div style={{ position: "relative", overflow: "hidden" }}>
+      {/* Page content — blurred when overlay is active */}
+      <div
+        style={{
+          filter: "blur(6px)",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+        aria-hidden="true"
+      >
+        <LetterPageShell
+          idx={3}
+          heroImage={IMAGES.skeletonKey}
+          title={<span>Three events. Three days. <span className="text-gradient-silver">Three rounds each.</span></span>}
+          intro={DOMAIN_EVENTS.intro}
+        >
+          <PageSection data-testid="domain-current">
+            <motion.div {...fadeUp} transition={{ duration: 0.7 }}>
+              <Tabs defaultValue={DOMAIN_EVENTS.current[0].id} className="w-full">
+                <TabsList className="grid h-auto w-full max-w-2xl grid-cols-3 border border-border bg-secondary/60">
+                  {DOMAIN_EVENTS.current.map((ev) => (
+                    <TabsTrigger
+                      key={ev.id}
+                      value={ev.id}
+                      className="whitespace-normal px-2 py-2 font-mono-tech text-[10px] uppercase tracking-[0.12em] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:text-xs"
                     >
-                      <span
-                        className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border bg-background font-mono-tech text-xs shadow-glow md:top-0"
-                        style={{
-                          borderColor: activeRounds[ev.id] === i
-                            ? "hsl(var(--primary))"
-                            : "hsl(var(--primary) / 0.4)",
-                          color: activeRounds[ev.id] === i
-                            ? "hsl(var(--primary))"
-                            : "inherit",
-                          transition: "border-color 0.3s ease, color 0.3s ease",
-                        }}
-                      >
-                        0{i + 1}
+                      {ev.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {DOMAIN_EVENTS.current.map((ev) => (
+                  <TabsContent key={ev.id} value={ev.id} className="mt-10">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge className="bg-gradient-silver font-mono-tech text-[10px] uppercase tracking-[0.2em] text-primary-foreground">2025 Edition</Badge>
+                      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <CalendarDays className="h-3.5 w-3.5" />{ev.dates} · one round per day
                       </span>
-                      <p className="font-mono-tech text-[10px] uppercase tracking-[0.25em] text-accent">{r.day} · {r.date}</p>
-                      <h3 className="mt-2 font-display text-lg font-semibold leading-snug text-foreground">{r.name}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{r.detail}</p>
-                    </motion.div>
-                  ))}
-                </div>
+                    </div>
+                    <h2 className="mt-5 font-display text-3xl font-bold text-foreground">{ev.name}</h2>
+                    <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">{ev.description}</p>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </motion.div>
+          </PageSection>
+        </LetterPageShell>
+      </div>
 
-                <Button variant="silver" className="mt-12" onClick={() => go("now")} data-testid={`domain-goto-register-${ev.id}`}>
-                  Register in the N section <ArrowRight className="h-4 w-4" />
-                </Button>
-              </TabsContent>
+      {/* Coming Soon overlay */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 50,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "rgba(0, 0, 0, 0.55)",
+          backdropFilter: "blur(2px)",
+          WebkitBackdropFilter: "blur(2px)",
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.88, y: 24 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            background: "hsl(var(--card) / 0.92)",
+            border: "1px solid hsl(var(--primary) / 0.25)",
+            borderRadius: "1.5rem",
+            padding: "3rem 3.5rem",
+            maxWidth: 480,
+            width: "calc(100% - 2.5rem)",
+            textAlign: "center",
+            boxShadow: "0 0 80px hsl(var(--primary) / 0.12), 0 24px 64px rgba(0,0,0,0.5)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Glow accent */}
+          <div
+            style={{
+              position: "absolute",
+              top: "-40%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 320,
+              height: 320,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Icon */}
+          <motion.div
+            animate={{ rotate: [0, -8, 8, -4, 4, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
+            style={{ display: "inline-flex", marginBottom: "1.25rem" }}
+          >
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                border: "1px solid hsl(var(--primary) / 0.35)",
+                background: "hsl(var(--primary) / 0.08)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.75rem",
+              }}
+            >
+              🔒
+            </div>
+          </motion.div>
+
+          {/* Label */}
+          <p
+            style={{
+              fontFamily: "var(--font-mono-tech, monospace)",
+              fontSize: "0.65rem",
+              letterSpacing: "0.35em",
+              textTransform: "uppercase",
+              color: "hsl(var(--primary) / 0.7)",
+              marginBottom: "0.75rem",
+            }}
+          >
+            Domain Events · 2025
+          </p>
+
+          {/* Heading */}
+          <h2
+            style={{
+              fontFamily: "var(--font-display, serif)",
+              fontSize: "clamp(1.6rem, 5vw, 2.2rem)",
+              fontWeight: 700,
+              color: "hsl(var(--foreground))",
+              lineHeight: 1.2,
+              marginBottom: "1rem",
+            }}
+          >
+            Coming Soon
+          </h2>
+
+          {/* Sub-copy */}
+          <p
+            style={{
+              fontSize: "0.875rem",
+              lineHeight: 1.7,
+              color: "hsl(var(--muted-foreground))",
+              maxWidth: 340,
+              margin: "0 auto 2rem",
+            }}
+          >
+            The Domain Events page for FUNDAZ 2025 is being finalised. Check back soon — three brand-new events, each running across all three days of the fest.
+          </p>
+
+          {/* Animated dots */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.1, 0.8] }}
+                transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.22 }}
+                style={{
+                  display: "block",
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: "hsl(var(--primary))",
+                }}
+              />
             ))}
-          </Tabs>
-        </motion.div>
-      </PageSection>
+          </div>
 
-      <PageSection data-testid="domain-past">
-        <SectionKicker>Retired into Legend</SectionKicker>
-        <h2 className="mt-4 font-display text-2xl font-bold text-foreground sm:text-3xl">Past domain events</h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Our previous editions featured ambitious domain-specific challenges that pushed boundaries. Each lived exactly one edition, serving its purpose to test the sharpest minds before vanishing into the FUNDAZ archives forever.
-        </p>
-        <Accordion type="single" collapsible className="mt-8 max-w-3xl">
-          {DOMAIN_EVENTS.past.map((y) => (
-            <AccordionItem key={y.year} value={y.year} className="border-border">
-              <AccordionTrigger className="font-display text-base text-foreground hover:text-primary hover:no-underline" data-testid={`domain-past-${y.year}`}>
-                <span><span className="text-gradient-silver font-bold">{y.year}</span><span className="ml-3 font-normal text-muted-foreground">· 3 events</span></span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <ul className="space-y-2 pl-1">
-                  {y.events.map((e) => (
-                    <li key={e} className="flex items-start gap-3 text-sm text-muted-foreground">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-                      {e}
-                    </li>
-                  ))}
-                </ul>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </PageSection>
-    </LetterPageShell>
+
+          {/* Navigation buttons */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: "2rem", flexWrap: "wrap" }}>
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => go("now")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "0.6rem 1.4rem",
+                borderRadius: "0.6rem",
+                border: "1px solid hsl(var(--border))",
+                background: "transparent",
+                color: "hsl(var(--muted-foreground))",
+                fontSize: "0.75rem",
+                fontFamily: "var(--font-mono-tech, monospace)",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                transition: "border-color 0.2s ease, color 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
+                e.currentTarget.style.color = "hsl(var(--foreground))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border))";
+                e.currentTarget.style.color = "hsl(var(--muted-foreground))";
+              }}
+              data-testid="domain-coming-soon-back"
+            >
+              <ArrowRight className="h-3.5 w-3.5 rotate-180" />
+              Back to Now
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => go("arena")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "0.6rem 1.4rem",
+                borderRadius: "0.6rem",
+                border: "1px solid hsl(var(--primary) / 0.4)",
+                background: "hsl(var(--primary) / 0.08)",
+                color: "hsl(var(--primary))",
+                fontSize: "0.75rem",
+                fontFamily: "var(--font-mono-tech, monospace)",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                transition: "border-color 0.2s ease, background 0.2s ease, color 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.8)";
+                e.currentTarget.style.background = "hsl(var(--primary) / 0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.4)";
+                e.currentTarget.style.background = "hsl(var(--primary) / 0.08)";
+              }}
+              data-testid="domain-coming-soon-arena"
+            >
+              Activities
+              <ArrowRight className="h-3.5 w-3.5" />
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
   );
 }

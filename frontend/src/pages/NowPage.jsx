@@ -1,10 +1,7 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { ExternalLink, ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { LetterPageShell, PageSection, SectionKicker, fadeUp } from "@/components/LetterPageShell";
-import { RegisterDialog } from "@/components/RegisterDialog";
 import { NOW_EVENTS, NOW_GLANCE } from "@/data/content";
 import DomeGallery from "@/components/DomeGallery";
 
@@ -15,7 +12,6 @@ const typeStyles = {
 };
 
 export default function NowPage() {
-  const [selected, setSelected] = useState(null);
 
   return (
     <LetterPageShell
@@ -68,17 +64,13 @@ export default function NowPage() {
                 )}
               </div>
               <div className="col-span-2 lg:col-span-1">
-                {ev.action === "register" ? (
-                  <Button variant="silver" onClick={() => setSelected(ev)} data-testid={`register-open-${ev.id}`}>
-                    Register Here <ArrowUpRight className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button variant="outlineSilver" asChild data-testid={`external-link-${ev.id}`}>
-                    <a href={ev.url} target="_blank" rel="noopener noreferrer">
-                      Official Registration <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </Button>
-                )}
+                <div
+                  className="inline-flex items-center gap-2 rounded-md border border-dashed border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-mono-tech uppercase tracking-[0.15em]"
+                  data-testid={`coming-soon-${ev.id}`}
+                >
+                  <Clock className="h-3.5 w-3.5 animate-pulse text-primary/60" />
+                  <span className="text-primary/60">Coming Soon</span>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -100,8 +92,6 @@ export default function NowPage() {
           />
         </div>
       </PageSection>
-
-      <RegisterDialog event={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />
     </LetterPageShell>
   );
 }
