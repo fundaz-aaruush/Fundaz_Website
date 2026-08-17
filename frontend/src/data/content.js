@@ -14,17 +14,19 @@ export const IMAGES = {
   speakerStage: u("photo-1626125345510-4603468eedfb", 1400),
 };
 
+const greyPfp = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a1b1e'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%232a2d33'/%3E%3Cpath d='M20 100 A 30 30 0 0 1 80 100' fill='%232a2d33'/%3E%3C/svg%3E";
+
 const P = {
-  p1: u("photo-1764545973653-94c40d993495", 500),
-  p2: u("photo-1638290047807-4c9d389b9aa6", 500),
-  p3: u("photo-1770894807442-108cc33c0a7a", 500),
-  p4: u("photo-1766022411633-e88e3650538b", 500),
-  p5: u("photo-1758922584983-82ffd5720c6a", 500),
-  p6: u("photo-1542190891-2093d38760f2", 500),
-  p7: u("photo-1745060594679-61578eb592f7", 500),
-  p8: u("photo-1649433658557-54cf58577c68", 500),
-  p9: u("photo-1778692258270-bc0e80e975c0", 500),
-  p10: u("photo-1609371497456-3a55a205d5eb", 500),
+  p1: greyPfp,
+  p2: greyPfp,
+  p3: greyPfp,
+  p4: greyPfp,
+  p5: greyPfp,
+  p6: greyPfp,
+  p7: greyPfp,
+  p8: greyPfp,
+  p9: greyPfp,
+  p10: greyPfp,
 };
 
 // ---------------- F — FLAGSHIP ----------------
