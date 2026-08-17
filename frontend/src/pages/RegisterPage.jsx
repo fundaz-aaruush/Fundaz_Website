@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useTransitionNav } from "@/components/PageTransition";
+import { useNavigate } from "react-router-dom";
 import { AtomLogo } from "@/components/AtomLogo";
 
 // ─── Field config ──────────────────────────────────────────────────────────────
@@ -854,7 +855,7 @@ export function RegNoVerifier({ onGoHome, onScrollToForm }) {
 
 // ─── SuccessScreen ─────────────────────────────────────────────────────────────
 
-export function SuccessSection({ regNo, onReset, onBrowse }) {
+export function SuccessScreen({ regNo, onReset, onBrowse }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", padding: "2rem", textAlign: "center" }}>
       <div style={{ fontSize: "3rem", marginBottom: "1.5rem" }}>🎉</div>
@@ -895,6 +896,7 @@ export default function RegisterPage() {
   const [phase,         setPhase]         = useState("verify"); // "verify" | "form" | "success"
   const [verifiedRegNo, setVerifiedRegNo] = useState(null);
   const { go } = useTransitionNav();
+  const navigate = useNavigate();
 
   return (
     <div style={{ minHeight: "100vh", background: "#090912", color: "white", position: "relative" }}>
@@ -925,6 +927,10 @@ export default function RegisterPage() {
         {phase === "verify" && (
           <RegNoVerifier
             onVerified={(rn) => { setVerifiedRegNo(rn); setPhase("form"); }}
+            onGoHome={() => {
+              sessionStorage.removeItem("fz_preloaded");
+              navigate("/home");
+            }}
           />
         )}
         {phase === "form" && (
@@ -937,6 +943,10 @@ export default function RegisterPage() {
           <SuccessScreen
             regNo={verifiedRegNo}
             onReset={() => { setVerifiedRegNo(null); setPhase("verify"); }}
+            onBrowse={() => {
+              sessionStorage.removeItem("fz_preloaded");
+              navigate("/home");
+            }}
           />
         )}
       </div>

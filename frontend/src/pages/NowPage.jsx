@@ -201,7 +201,7 @@ export default function NowPage() {
       </PageSection>
 
       {/* Volunteer Section */}
-      <PageSection data-testid="now-volunteer" className="border-t border-border mt-16 pt-16">
+      <PageSection id="volunteer" data-testid="now-volunteer" className="border-t border-border mt-16 pt-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp} transition={{ duration: 0.55 }}>
             <SectionKicker>Join the Crew</SectionKicker>

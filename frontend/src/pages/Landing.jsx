@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, useAnimationFrame, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Preloader } from "@/components/Preloader";
@@ -17,6 +18,7 @@ const HINT_DURATION_MS = 2600; // overlay auto-dismisses after ~2.6s
 // The landing experience: preloader collision → frosted hint overlay (2.5s) → full atom system
 export default function Landing() {
   const { go } = useTransitionNav();
+  const navigate = useNavigate();
   const formSectionRef = useRef(null);
   const verifierSectionRef = useRef(null);
 
@@ -89,8 +91,8 @@ export default function Landing() {
         <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: "1px", background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)" }} />
         <OnboardingFlow
           onSuccess={() => {
-            scrollToVerifier();
-            setTimeout(() => go("home"), 2200);
+            sessionStorage.removeItem("fz_preloaded");
+            setTimeout(() => navigate("/home"), 2200);
           }}
         />
       </section>

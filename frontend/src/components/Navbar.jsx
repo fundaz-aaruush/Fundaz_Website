@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -12,6 +12,7 @@ export const Navbar = ({ minimal = false }) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { go } = useTransitionNav();
+  const navigate = useNavigate();
   const { pathname } = useLocation();
   const activeIdx = LETTERS.findIndex((l) => `/${l.id}` === pathname);
 
@@ -28,6 +29,18 @@ export const Navbar = ({ minimal = false }) => {
       return;
     }
     go(id);
+  };
+
+  const navToVolunteer = () => {
+    setOpen(false);
+    if (pathname === "/now") {
+      document.getElementById("volunteer")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/now");
+      setTimeout(() => {
+        document.getElementById("volunteer")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   };
 
   return (
@@ -76,6 +89,13 @@ export const Navbar = ({ minimal = false }) => {
                   </button>
                 ))}
 
+                {/* Registration Button (Desktop) */}
+                <button
+                  onClick={navToVolunteer}
+                  className="ml-4 rounded-full border border-primary/40 bg-primary/10 px-5 py-1.5 font-mono-tech text-[10px] font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary/20 hover:text-white"
+                >
+                  Volunteer
+                </button>
               </div>
 
               <Sheet open={open} onOpenChange={setOpen}>
@@ -102,6 +122,14 @@ export const Navbar = ({ minimal = false }) => {
                         </span>
                       </button>
                     ))}
+                    
+                    {/* Registration Button (Mobile) */}
+                    <button
+                      onClick={navToVolunteer}
+                      className="mt-4 flex w-full items-center justify-center rounded-md bg-primary/10 py-3 font-mono-tech text-xs font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary/20 hover:text-white"
+                    >
+                      Register as Volunteer
+                    </button>
                   </div>
                   <div className="mt-6 border-t border-border pt-4" />
                 </SheetContent>
