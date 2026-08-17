@@ -55,7 +55,8 @@ export const FLAGSHIP = {
     },
   ],
   pastEditions: [
-    { year: "2024" },
+    { year: "2025", organiser: "Abhijit Harsh" },
+    { year: "2024", organiser: "Harsh Abhishek" },
     { year: "2023", organiser: "Abhinay P" },
     { year: "2022", organiser: "Aditi Shah" },
     { year: "2021" },

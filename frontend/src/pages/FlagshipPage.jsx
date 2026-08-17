@@ -87,17 +87,7 @@ export default function FlagshipPage() {
         </div>
       </PageSection>
 
-      {/* Join Crew Section */}
-      <PageSection data-testid="flagship-join-crew" className="border-t border-border pt-12">
-        <SectionKicker>Join the Crew</SectionKicker>
-        <h2 className="mt-4 font-display text-2xl font-bold text-foreground sm:text-3xl">
-          Join Crew 2026
-        </h2>
-        <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-          Applications for the 2026 crew will open soon. Keep an eye on this space.
-        </p>
-      </PageSection>
-
+    
     </LetterPageShell>
   );
 }
