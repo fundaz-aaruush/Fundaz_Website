@@ -696,15 +696,26 @@ export function RegNoVerifier({ onGoHome, onScrollToForm }) {
     setError(null);
     setChecking(true);
     try {
+      console.log("Checking regNo:", t);
       const snap = await getDocs(
         query(collection(db, "users"), where("regNo", "==", t))
       );
+      console.log("Query snap empty?", snap.empty);
+      if (snap.empty) {
+        // Let's also fetch ALL documents just to see what's actually there
+        const allSnap = await getDocs(collection(db, "users"));
+        console.log("Total docs in users:", allSnap.size);
+        allSnap.forEach(doc => {
+          console.log("Found doc:", doc.id, "regNo:", doc.data().regNo, "Length:", doc.data().regNo?.length);
+        });
+      }
       setResult(snap.empty ? "not-found" : "found");
       if (!snap.empty) {
         // Auto-redirect home after 2s
         setTimeout(() => onGoHome?.(), 2000);
       }
-    } catch {
+    } catch (err) {
+      console.error("Lookup error:", err);
       setError("Connection error — please try again.");
     } finally {
       setChecking(false);
