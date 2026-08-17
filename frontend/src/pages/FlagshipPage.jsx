@@ -16,12 +16,12 @@ export default function FlagshipPage() {
       <PageSection data-testid="flagship-edition">
         <div className="grid items-center gap-10 border-t border-border pt-12 lg:grid-cols-2">
           <motion.div {...fadeUp} transition={{ duration: 0.7 }} className="relative overflow-hidden rounded-xl shadow-elegant">
-            <img src={IMAGES.stageLights} alt="Main Quiz stage" className="h-[300px] w-full object-cover opacity-80 grayscale md:h-[400px]" loading="lazy" />
+            <img src={IMAGES.audiCar} alt="Audi car" className="h-[300px] w-full object-cover opacity-80 grayscale md:h-[400px]" loading="lazy" />
             <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-transparent" />
             <p className="absolute bottom-4 left-5 font-mono-tech text-[10px] uppercase tracking-[0.3em] text-primary/80">Finale night · archive</p>
           </motion.div>
           <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.1 }}>
-            <SectionKicker>2025 Edition</SectionKicker>
+            <SectionKicker>2026 Edition</SectionKicker>
             <h2 className="mt-4 font-display text-3xl font-bold text-foreground sm:text-4xl">{FLAGSHIP.edition}</h2>
             <p className="mt-1 font-mono-tech text-xs uppercase tracking-[0.3em] text-accent">{FLAGSHIP.theme}</p>
             <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-4 text-sm text-muted-foreground">
@@ -77,15 +77,37 @@ export default function FlagshipPage() {
             >
               <span className="font-display text-3xl font-bold text-gradient-silver sm:text-4xl">{e.year}</span>
               <div>
-                <h3 className="font-display text-lg font-semibold text-foreground">{e.theme}</h3>
-                <p className="mt-1 max-w-xl text-sm text-muted-foreground">{e.note}</p>
+                <p className="max-w-xl text-sm text-muted-foreground">{e.note}</p>
               </div>
-              <span className="col-span-2 font-mono-tech text-[10px] uppercase tracking-[0.2em] text-accent sm:col-span-1 sm:text-right">
-                Winner · {e.winner}
-              </span>
+              {e.organiser ? (
+                <span className="col-span-2 font-mono-tech text-[10px] uppercase tracking-[0.2em] text-accent sm:col-span-1 sm:text-right">
+                  Organiser: {e.organiser}
+                </span>
+              ) : (
+                <span className="col-span-2 sm:col-span-1" />
+              )}
             </motion.div>
           ))}
         </div>
+      </PageSection>
+
+      {/* Join Crew Section */}
+      <PageSection data-testid="flagship-join-crew" className="border-t border-border pt-12">
+        <SectionKicker>Join the Crew</SectionKicker>
+        <h2 className="mt-4 font-display text-2xl font-bold text-foreground sm:text-3xl">
+          Join Crew 2026
+        </h2>
+        <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+          Applications for the 2026 crew will open soon. Keep an eye on this space.
+        </p>
+      </PageSection>
+
+      {/* This Year's Team Section */}
+      <PageSection data-testid="flagship-team" className="border-t border-border pt-12">
+        <SectionKicker>The People Behind It</SectionKicker>
+        <h2 className="mt-4 font-display text-2xl font-bold text-foreground sm:text-3xl">
+          This Year's Team — To Be Revealed
+        </h2>
       </PageSection>
     </LetterPageShell>
   );
