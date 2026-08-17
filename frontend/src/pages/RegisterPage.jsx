@@ -299,7 +299,7 @@ export function OnboardingFlow({ onSuccess }) {
     const save = async () => {
       setSubmitting(true);
       try {
-        await addDoc(collection(db, "users"), {
+        const savePromise = addDoc(collection(db, "users"), {
           regNo:       v.regNo?.trim().toUpperCase()        ?? "",
           name:        v.name?.trim()                       ?? "",
           email:       v.email?.trim()                      ?? "",
@@ -307,6 +307,10 @@ export function OnboardingFlow({ onSuccess }) {
           course:      v.course?.trim()                     ?? "",
           submittedAt: serverTimestamp(),
         });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout saving to database. Are you on a restricted Wi-Fi network?")), 8000));
+        
+        await Promise.race([savePromise, timeoutPromise]);
+        
         setSubmitting(false);
         onSuccess();
       } catch (err) {
@@ -333,9 +337,15 @@ export function OnboardingFlow({ onSuccess }) {
       setChecking(true);
       try {
         const normalized = val.trim().toUpperCase();
-        const snap = await getDocs(
+        
+        // Wrap the Firebase call in a 5-second timeout so it doesn't hang forever on blocked networks
+        const checkPromise = getDocs(
           query(collection(db, "users"), where("regNo", "==", normalized))
         );
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+        
+        const snap = await Promise.race([checkPromise, timeoutPromise]);
+        
         if (!snap.empty) {
           setErrors((e) => ({ ...e, regNo: "This reg number is already registered — use the lookup above" }));
           setChecking(false);
@@ -343,8 +353,9 @@ export function OnboardingFlow({ onSuccess }) {
         }
         // Normalise to uppercase in values
         setValues((v) => ({ ...v, regNo: normalized }));
-      } catch {
-        // Network error — let them proceed; Firestore save will naturally fail on its own
+      } catch (err) {
+        // Network error or timeout — let them proceed; Firestore save will naturally fail on its own if completely blocked
+        setValues((v) => ({ ...v, regNo: val.trim().toUpperCase() }));
       }
       setChecking(false);
     }
