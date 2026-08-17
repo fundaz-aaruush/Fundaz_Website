@@ -91,10 +91,10 @@ export const Navbar = ({ minimal = false }) => {
 
                 {/* Registration Button (Desktop) */}
                 <button
-                  onClick={navToVolunteer}
+                  onClick={() => window.location.href = '/portal'}
                   className="ml-4 rounded-full border border-primary/40 bg-primary/10 px-5 py-1.5 font-mono-tech text-[10px] font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary/20 hover:text-white"
                 >
-                  Volunteer
+                  Register
                 </button>
               </div>
 
@@ -125,10 +125,10 @@ export const Navbar = ({ minimal = false }) => {
                     
                     {/* Registration Button (Mobile) */}
                     <button
-                      onClick={navToVolunteer}
+                      onClick={() => window.location.href = '/portal'}
                       className="mt-4 flex w-full items-center justify-center rounded-md bg-primary/10 py-3 font-mono-tech text-xs font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary/20 hover:text-white"
                     >
-                      Register as Volunteer
+                      Register
                     </button>
                   </div>
                   <div className="mt-6 border-t border-border pt-4" />

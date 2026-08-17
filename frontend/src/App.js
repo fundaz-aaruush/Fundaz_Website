@@ -34,7 +34,7 @@ function App() {
               <Route path="/domain" element={<DomainPage />} />
               <Route path="/arena" element={<ArenaPage />} />
               <Route path="/zenith"   element={<ZenithPage />} />
-              <Route path="/secret-register" element={<RegisterPage />} />
+              <Route path="/portal" element={<RegisterPage />} />
               <Route path="*"         element={<HomePage />} />
             </Routes>
             <Toaster position="bottom-right" richColors />

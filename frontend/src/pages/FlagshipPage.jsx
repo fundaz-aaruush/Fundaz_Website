@@ -102,13 +102,6 @@ export default function FlagshipPage() {
         </p>
       </PageSection>
 
-      {/* This Year's Team Section */}
-      <PageSection data-testid="flagship-team" className="border-t border-border pt-12">
-        <SectionKicker>The People Behind It</SectionKicker>
-        <h2 className="mt-4 font-display text-2xl font-bold text-foreground sm:text-3xl">
-          This Year's Team — To Be Revealed
-        </h2>
-      </PageSection>
     </LetterPageShell>
   );
 }

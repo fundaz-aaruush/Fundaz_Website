@@ -35,9 +35,9 @@ export const FLAGSHIP = {
   edition: "Main Quiz '26",
   theme: "The Paradox Protocol",
   date: "TBD – 13, 2026",
-  venue: "Dr. T.P. Ganesan Auditorium, SRMIST",
-  teamSize: "Teams of 2",
-  prizePool: "₹75,000+",
+  venue: "SRMIST",
+  teamSize: "To Be Revealed",
+  prizePool: "To Be Disclosed",
   description:
     "The Main Quiz is where FUNDAZ peaks every year — a Three-day battle of wit spanning science, mathematics, pop culture, and pure lateral madness. Hundreds of teams enter the prelims; five to six teams survive to the stage finale under the lights.",
   rounds: [
@@ -55,10 +55,10 @@ export const FLAGSHIP = {
     },
   ],
   pastEditions: [
-    { year: "2024", note: "1,100+ participants — largest prelims in FUNDAZ history." },
-    { year: "2023", note: "The finale famously ended on a tie-breaker pounce.", organiser: "Abhinay P" },
-    { year: "2022", note: "First hybrid edition — campus stage plus live stream.", organiser: "Aditi Shah" },
-    { year: "2021", note: "The all-online edition that kept the flame alive." },
+    { year: "2024" },
+    { year: "2023", organiser: "Abhinay P" },
+    { year: "2022", organiser: "Aditi Shah" },
+    { year: "2021" },
   ],
   registerUrl: "https://aaruush.org",
 };
@@ -68,20 +68,20 @@ export const UNEARTHED = {
   intro:
     "FUNDAZ is the fun-and-logic domain of Aaruush, the national-level techno-management fest of SRM Institute of Science and Technology. Born as a single quiz table in a corridor, it grew into the domain that gamifies mathematics, science, logical reasoning and critical thinking for thousands of students every year.",
   body:
-    "The philosophy has never changed: learning sticks when it feels like play. From campus-wide treasure hunts to scripted mystery rooms and the legendary Main Quiz, every FUNDAZ event is engineered to make you think sideways. What began with a handful of volunteers is now one of the most-awaited domains at Aaruush.",
+    "The philosophy has never changed: learning sticks when it feels like play. From campus-wide treasure hunts to scripted mystery rooms and the legendary Main Quiz, every FUNDAZ event is engineered to make you think sideways. What began with a handful of members is now one of the most-awaited domains at Aaruush.",
   stats: [
     { value: "13+", label: "Editions" },
     { value: "5,000+", label: "Annual Footfall" },
     { value: "15+", label: "Events Every Year" },
-    { value: "60+", label: "Volunteers & Crew" },
+    { value: "60+", label: "Team & Crew" },
   ],
   organisers: [
     { name: "Avinav Panigrahi", role: "ORGANISER", years: "2026", photo: P.p6, note: "Scripted the first Mystery Room case and never told anyone the ending." },
     { name: "Abhijit Harsh", role: "ORGANISER", years: "2025", photo: P.p8, note: "Scaled the Main Quiz prelims past 500 teams for the first time." },
     { name: "Harsh Abhishek", role: "ORGANISER", years: "2024", photo: P.p2, note: "Took the whole domain online overnight during the Genesis edition." },
     { name: "Ananya Krishnan", role: "Domain Lead", years: "2021 – 2022", photo: P.p9, note: "Designed the campus-wide clue grid still used by Treasure Hunt today." },
-    { name: "Arjun Mehta", role: "Quizmaster", years: "2022 – 2023", photo: P.p3, note: "Wrote 400+ original questions — not one leaked, ever." },
-    { name: "Kavya Nair", role: "Domain Lead", years: "2023 – 2024", photo: P.p10, note: "Brought national-circuit quizzers and speakers to the FUNDAZ stage." },
+    { name: "Abhinay P", role: "ORGANISER", years: "2023", photo: P.p3, note: "Wrote 400+ original questions — not one leaked, ever." },
+    { name: "Aditi Shah", role: "ORGANISER", years: "2022", photo: P.p10, note: "Brought national-circuit quizzers and speakers to the FUNDAZ stage." },
   ],
 };
 
@@ -255,11 +255,11 @@ export const FLAGSHIP_STATS = [
 ];
 
 export const UNEARTHED_ERAS = [
-  { year: "2013", title: "The Corridor Quiz", text: "A single quiz table outside the physics block. Forty students showed up. The domain was born by accident." },
-  { year: "2016", title: "The First Mystery Room", text: "One classroom, one scripted case, one very confused security guard. The format never left." },
-  { year: "2019", title: "The Campus Goes Live", text: "Treasure Hunt scaled to the full SRMIST campus with a clue grid still in use today." },
-  { year: "2021", title: "Genesis — Fully Online", text: "Lockdown edition. Ciphers over Discord, quizzes over stream — the flame stayed lit." },
-  { year: "2024", title: "The Record Year", text: "Largest prelims in FUNDAZ history and a footfall past five thousand." },
+  { year: "2008", title: "The Birth of FUNDAZ", text: "FUNDAZ was inaugurated as the fun-and-logic domain of Aaruush, bringing quizzing and lateral thinking to the SRM stage for the first time." },
+  { year: "2015", title: "Mystery Room Debuts", text: "The first Mystery Room case was scripted and staged — a locked-door format unlike anything else at the fest. The crowd was hooked instantly." },
+  { year: "2021", title: "Treasure Hunt Joins the Family", text: "Treasure Hunt became an official part of FUNDAZ, turning the entire SRMIST campus into a living puzzle board." },
+  { year: "2022", title: "The First Murder Mystery", text: "FUNDAZ conducted its first-ever Murder Mystery — a fully scripted whodunit that set a new benchmark for immersive storytelling at the domain." },
+  { year: "2025", title: "Treasure Hunt Goes Online", text: "Treasure Hunt made the leap to a fully online format, extending the campus-wide chase beyond physical boundaries for the first time." },
 ];
 
 export const NOW_GLANCE = [
