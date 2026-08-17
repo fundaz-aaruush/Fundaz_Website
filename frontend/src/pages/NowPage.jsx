@@ -17,8 +17,8 @@ const typeStyles = {
 };
 
 function VolunteerForm() {
-  const [formData, setFormData] = useState({ 
-    name: "", regNo: "", email: "", phone: "" 
+  const [formData, setFormData] = useState({
+    name: "", regNo: "", email: "", phone: ""
   });
   const [status, setStatus] = useState("idle");
   const [errors, setErrors] = useState({});
@@ -26,7 +26,7 @@ function VolunteerForm() {
   const validate = () => {
     const err = {};
     if (!formData.name.trim()) err.name = "Required";
-    
+
     const regNo = formData.regNo.trim().toUpperCase();
     if (!regNo) err.regNo = "Required";
     else if (!regNo.startsWith("RA") || regNo.length < 13) err.regNo = "Invalid registration number format";
@@ -45,7 +45,7 @@ function VolunteerForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    
+
     setStatus("submitting");
     try {
       // Storing Name, Reg No, Email, and Phone perfectly to Firebase
@@ -73,10 +73,10 @@ function VolunteerForm() {
             <span>Full Name</span>
             {errors.name && <span className="text-destructive lowercase tracking-normal">{errors.name}</span>}
           </label>
-          <Input 
-            placeholder="Ada Lovelace" 
-            value={formData.name} 
-            onChange={(e) => { setFormData(d => ({ ...d, name: e.target.value })); setErrors(e => ({...e, name: null})) }}
+          <Input
+            placeholder="Ada Lovelace"
+            value={formData.name}
+            onChange={(e) => { setFormData(d => ({ ...d, name: e.target.value })); setErrors(e => ({ ...e, name: null })) }}
             className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.name ? "border-destructive/50" : ""}`}
           />
         </div>
@@ -85,10 +85,10 @@ function VolunteerForm() {
             <span>Register No.</span>
             {errors.regNo && <span className="text-destructive lowercase tracking-normal">{errors.regNo}</span>}
           </label>
-          <Input 
-            placeholder="RA2311XXXXXXX" 
-            value={formData.regNo} 
-            onChange={(e) => { setFormData(d => ({ ...d, regNo: e.target.value.toUpperCase() })); setErrors(e => ({...e, regNo: null})) }}
+          <Input
+            placeholder="RA2311XXXXXXX"
+            value={formData.regNo}
+            onChange={(e) => { setFormData(d => ({ ...d, regNo: e.target.value.toUpperCase() })); setErrors(e => ({ ...e, regNo: null })) }}
             className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.regNo ? "border-destructive/50" : ""}`}
           />
         </div>
@@ -97,11 +97,11 @@ function VolunteerForm() {
             <span>Email</span>
             {errors.email && <span className="text-destructive lowercase tracking-normal">{errors.email}</span>}
           </label>
-          <Input 
+          <Input
             type="email"
-            placeholder="ada@srmist.edu.in" 
-            value={formData.email} 
-            onChange={(e) => { setFormData(d => ({ ...d, email: e.target.value })); setErrors(e => ({...e, email: null})) }}
+            placeholder="ada@srmist.edu.in"
+            value={formData.email}
+            onChange={(e) => { setFormData(d => ({ ...d, email: e.target.value })); setErrors(e => ({ ...e, email: null })) }}
             className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.email ? "border-destructive/50" : ""}`}
           />
         </div>
@@ -110,18 +110,18 @@ function VolunteerForm() {
             <span>Phone</span>
             {errors.phone && <span className="text-destructive lowercase tracking-normal">{errors.phone}</span>}
           </label>
-          <Input 
+          <Input
             type="tel"
-            placeholder="98765 43210" 
-            value={formData.phone} 
-            onChange={(e) => { setFormData(d => ({ ...d, phone: e.target.value })); setErrors(e => ({...e, phone: null})) }}
+            placeholder="98765 43210"
+            value={formData.phone}
+            onChange={(e) => { setFormData(d => ({ ...d, phone: e.target.value })); setErrors(e => ({ ...e, phone: null })) }}
             className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.phone ? "border-destructive/50" : ""}`}
           />
         </div>
       </div>
-      
-      <Button 
-        type="submit" 
+
+      <Button
+        type="submit"
         disabled={status === "submitting" || status === "success"}
         className="w-full font-mono-tech uppercase tracking-[0.1em] text-xs h-11"
       >
@@ -200,7 +200,7 @@ export default function NowPage() {
         </div>
       </PageSection>
 
-      {/* Volunteer Section */}
+      {/* Volunteer Section
       <PageSection id="volunteer" data-testid="now-volunteer" className="border-t border-border mt-16 pt-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div {...fadeUp} transition={{ duration: 0.55 }}>
@@ -216,7 +216,7 @@ export default function NowPage() {
             <VolunteerForm />
           </motion.div>
         </div>
-      </PageSection>
+      </PageSection> */}
 
       <PageSection data-testid="now-team" className="max-w-none px-0 sm:px-0 pt-20">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 mb-10 text-center">
@@ -226,7 +226,7 @@ export default function NowPage() {
           </h2>
         </div>
         <div style={{ width: '100%', height: '80vh', position: 'relative' }}>
-          <DomeGallery 
+          <DomeGallery
             minRadius={400}
             segments={28}
             grayscale={false}
