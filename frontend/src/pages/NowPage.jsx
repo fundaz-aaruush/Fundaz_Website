@@ -1,15 +1,138 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { LetterPageShell, PageSection, SectionKicker, fadeUp } from "@/components/LetterPageShell";
 import { NOW_EVENTS, NOW_GLANCE } from "@/data/content";
 import DomeGallery from "@/components/DomeGallery";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/firebase";
 
 const typeStyles = {
   Flagship: "border-primary/60 text-primary",
   Activity: "border-accent/60 text-accent",
   "Domain Event": "border-muted-foreground/50 text-muted-foreground",
 };
+
+function VolunteerForm() {
+  const [formData, setFormData] = useState({ 
+    name: "", regNo: "", email: "", phone: "" 
+  });
+  const [status, setStatus] = useState("idle");
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const err = {};
+    if (!formData.name.trim()) err.name = "Required";
+    
+    const regNo = formData.regNo.trim().toUpperCase();
+    if (!regNo) err.regNo = "Required";
+    else if (!regNo.startsWith("RA") || regNo.length < 13) err.regNo = "Invalid registration number format";
+
+    if (!formData.email.trim()) err.email = "Required";
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email)) err.email = "Invalid email address";
+
+    const phone = formData.phone.replace(/[\s()\-+]/g, "");
+    if (!phone) err.phone = "Required";
+    else if (!/^\d{10}$/.test(phone)) err.phone = "Enter a valid 10-digit number";
+
+    setErrors(err);
+    return Object.keys(err).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    
+    setStatus("submitting");
+    try {
+      // Storing Name, Reg No, Email, and Phone perfectly to Firebase
+      await addDoc(collection(db, "volunteers"), {
+        name: formData.name.trim(),
+        regNo: formData.regNo.trim().toUpperCase(),
+        email: formData.email.trim(),
+        phone: formData.phone.replace(/[\s()\-+]/g, ""),
+        submittedAt: serverTimestamp(),
+      });
+      setStatus("success");
+      setFormData({ name: "", regNo: "", email: "", phone: "" });
+      setErrors({});
+    } catch (err) {
+      console.error(err);
+      setStatus("error");
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="font-mono-tech text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex justify-between">
+            <span>Full Name</span>
+            {errors.name && <span className="text-destructive lowercase tracking-normal">{errors.name}</span>}
+          </label>
+          <Input 
+            placeholder="Ada Lovelace" 
+            value={formData.name} 
+            onChange={(e) => { setFormData(d => ({ ...d, name: e.target.value })); setErrors(e => ({...e, name: null})) }}
+            className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.name ? "border-destructive/50" : ""}`}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="font-mono-tech text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex justify-between">
+            <span>Register No.</span>
+            {errors.regNo && <span className="text-destructive lowercase tracking-normal">{errors.regNo}</span>}
+          </label>
+          <Input 
+            placeholder="RA2311XXXXXXX" 
+            value={formData.regNo} 
+            onChange={(e) => { setFormData(d => ({ ...d, regNo: e.target.value.toUpperCase() })); setErrors(e => ({...e, regNo: null})) }}
+            className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.regNo ? "border-destructive/50" : ""}`}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="font-mono-tech text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex justify-between">
+            <span>Email</span>
+            {errors.email && <span className="text-destructive lowercase tracking-normal">{errors.email}</span>}
+          </label>
+          <Input 
+            type="email"
+            placeholder="ada@srmist.edu.in" 
+            value={formData.email} 
+            onChange={(e) => { setFormData(d => ({ ...d, email: e.target.value })); setErrors(e => ({...e, email: null})) }}
+            className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.email ? "border-destructive/50" : ""}`}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="font-mono-tech text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex justify-between">
+            <span>Phone</span>
+            {errors.phone && <span className="text-destructive lowercase tracking-normal">{errors.phone}</span>}
+          </label>
+          <Input 
+            type="tel"
+            placeholder="98765 43210" 
+            value={formData.phone} 
+            onChange={(e) => { setFormData(d => ({ ...d, phone: e.target.value })); setErrors(e => ({...e, phone: null})) }}
+            className={`bg-background/50 border-border/50 focus-visible:ring-primary/50 ${errors.phone ? "border-destructive/50" : ""}`}
+          />
+        </div>
+      </div>
+      
+      <Button 
+        type="submit" 
+        disabled={status === "submitting" || status === "success"}
+        className="w-full font-mono-tech uppercase tracking-[0.1em] text-xs h-11"
+      >
+        {status === "submitting" ? "Submitting..." : status === "success" ? "Submitted Successfully ✓" : "Submit Application"}
+      </Button>
+      {status === "error" && (
+        <p className="text-destructive text-xs font-mono-tech uppercase tracking-wider text-center mt-2">Error submitting. Please check your connection.</p>
+      )}
+    </form>
+  );
+}
 
 export default function NowPage() {
 
@@ -74,6 +197,24 @@ export default function NowPage() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </PageSection>
+
+      {/* Volunteer Section */}
+      <PageSection data-testid="now-volunteer" className="border-t border-border mt-16 pt-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div {...fadeUp} transition={{ duration: 0.55 }}>
+            <SectionKicker>Join the Crew</SectionKicker>
+            <h2 className="mt-4 font-display text-3xl font-bold text-foreground sm:text-4xl">
+              Register as a Volunteer
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-lg leading-relaxed">
+              Help us make FUNDAZ 2025 the most incredible event yet. We're looking for passionate individuals to assist with operations, hospitality, media, and tech.
+            </p>
+          </motion.div>
+          <motion.div {...fadeUp} transition={{ duration: 0.55, delay: 0.1 }} className="rounded-2xl border border-border bg-card/50 backdrop-blur p-8">
+            <VolunteerForm />
+          </motion.div>
         </div>
       </PageSection>
 

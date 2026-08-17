@@ -106,9 +106,21 @@ const LETTER_FRACS = WORD.map((_, i) => 0.1 + (i * 0.8) / (WORD.length - 1));
 
 const mono = "monospace";
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
 // ─── OnboardingFlow ───────────────────────────────────────────────────────────
 
 export function OnboardingFlow({ onSuccess }) {
+  const isMobile = useIsMobile();
   const pathRef  = useRef(null);
   const ballRef  = useRef(null);
   const spinRef  = useRef(null);
@@ -133,6 +145,7 @@ export function OnboardingFlow({ onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [checking,   setChecking]   = useState(false); // async regNo duplicate check
   const [submitError,setSubmitError] = useState(null);
+  const [animating,  setAnimating]  = useState(true); // true initially for the entrance roll
 
   const done = step >= FIELDS.length;
   valuesRef.current = values;  // keep ref current on every render
@@ -202,6 +215,7 @@ export function OnboardingFlow({ onSuccess }) {
     });
 
     // Entrance roll
+    setAnimating(true);
     gsap.fromTo(
       [ballRef.current, glowRef.current],
       { motionPath: { path, start: startFrac, end: startFrac, autoRotate: false } },
@@ -217,7 +231,13 @@ export function OnboardingFlow({ onSuccess }) {
     );
 
     const prox = { f: startFrac };
-    gsap.to(prox, { f: endFrac, duration: 2.2, ease: "power2.out", onUpdate: () => revealLetters(prox.f) });
+    gsap.to(prox, { 
+      f: endFrac, 
+      duration: 2.2, 
+      ease: "power2.out", 
+      onUpdate: () => revealLetters(prox.f),
+      onComplete: () => setAnimating(false)
+    });
 
     setReady(true);
     return () => gsap.killTweensOf([ballRef.current, glowRef.current, spinRef.current, trail]);
@@ -240,6 +260,7 @@ export function OnboardingFlow({ onSuccess }) {
     const dir      = target >= from ? 1 : -1;
     const nextSpin = spinDegRef.current + dir * (arc / BALL_R) * (180 / Math.PI);
 
+    setAnimating(true);
     gsap.to([ballRef.current, glowRef.current], {
       duration: 2, ease: "power1.inOut",
       motionPath: { path, start: from, end: target, autoRotate: false },
@@ -252,7 +273,13 @@ export function OnboardingFlow({ onSuccess }) {
     );
 
     const prox = { f: from };
-    gsap.to(prox, { f: target, duration: 2, ease: "power1.inOut", onUpdate: () => revealLetters(prox.f) });
+    gsap.to(prox, { 
+      f: target, 
+      duration: 2, 
+      ease: "power1.inOut", 
+      onUpdate: () => revealLetters(prox.f),
+      onComplete: () => setAnimating(false)
+    });
 
     prevFracRef.current = target;
     spinDegRef.current  = nextSpin;
@@ -413,10 +440,10 @@ export function OnboardingFlow({ onSuccess }) {
               <g ref={(el) => { letterInner.current[i] = el; }}>
                 <text
                   textAnchor="middle" dominantBaseline="central"
-                  fontFamily={mono} fontSize="38" fontWeight={700}
+                  fontFamily={mono} fontSize="46" fontWeight={800}
                   fill="url(#rp_chrome)"
-                  stroke="#000000" strokeOpacity="0.6" strokeWidth="0.9"
-                  style={{ paintOrder: "stroke" }}
+                  stroke="#000000" strokeOpacity="0.85" strokeWidth="5"
+                  style={{ paintOrder: "stroke fill" }}
                 >{ch}</text>
               </g>
             </g>
@@ -445,8 +472,14 @@ export function OnboardingFlow({ onSuccess }) {
             const cardY    = anchor.y - 78;
             const edgeX    = f.side === "left" ? cardX + CARD_W : cardX;
 
+            // On mobile, hide filled and pending cards. Only show active card when not animating.
+            let showCard = true;
+            if (isMobile) {
+              showCard = isActive && !animating;
+            }
+
             return (
-              <g key={f.key}>
+              <g key={f.key} style={{ opacity: showCard ? 1 : 0, transition: "opacity 0.4s", pointerEvents: showCard ? "auto" : "none" }}>
                 {/* Dashed connector to the rail anchor */}
                 <line
                   x1={edgeX} y1={anchor.y} x2={anchor.x} y2={anchor.y}
@@ -456,8 +489,13 @@ export function OnboardingFlow({ onSuccess }) {
                 />
 
                 {/* Card (HTML inside foreignObject) */}
-                <foreignObject x={cardX} y={cardY} width={CARD_W} height={172}>
-                  <div style={{ width: "100%", height: "100%" }}>
+                <foreignObject x={cardX} y={cardY} width={CARD_W} height={172} style={{ overflow: "visible" }}>
+                  <div style={{ 
+                    width: "100%", height: "100%", 
+                    transform: isMobile ? "scale(1.7)" : "scale(1)", 
+                    transformOrigin: f.side === "left" ? "left center" : "right center",
+                    transition: "transform 0.3s"
+                  }}>
                     <div style={{
                       height: "100%",
                       borderRadius: "1rem",
@@ -575,8 +613,8 @@ export function OnboardingFlow({ onSuccess }) {
 
           {/* Completion text at the exit anchor */}
           {done && (
-            <foreignObject x={VIEW_W / 2 - 210} y={ANCHORS[6].y + 14} width="420" height="150">
-              <div style={{ textAlign: "center" }}>
+            <foreignObject x={VIEW_W / 2 - 210} y={ANCHORS[6].y + 14} width="420" height="150" style={{ overflow: "visible" }}>
+              <div style={{ textAlign: "center", transform: isMobile ? "scale(1.7)" : "scale(1)", transformOrigin: "top center" }}>
                 <p style={{ fontFamily: mono, fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem" }}>
                   {submitting ? "Saving to FUNDAZ…" : submitError ? "Error" : "All fields complete"}
                 </p>
