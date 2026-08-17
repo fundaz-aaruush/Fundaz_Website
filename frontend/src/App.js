@@ -12,7 +12,6 @@ import NowPage from "@/pages/NowPage";
 import DomainPage from "@/pages/DomainPage";
 import ArenaPage from "@/pages/ArenaPage";
 import ZenithPage from "@/pages/ZenithPage";
-import RegisterPage from "@/pages/RegisterPage";
 
 function App() {
   return (
@@ -34,7 +33,6 @@ function App() {
               <Route path="/domain" element={<DomainPage />} />
               <Route path="/arena" element={<ArenaPage />} />
               <Route path="/zenith"   element={<ZenithPage />} />
-              <Route path="/portal" element={<RegisterPage />} />
               <Route path="*"         element={<HomePage />} />
             </Routes>
             <Toaster position="bottom-right" richColors />

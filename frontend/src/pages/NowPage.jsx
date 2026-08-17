@@ -140,7 +140,7 @@ export default function NowPage() {
     <LetterPageShell
       idx={2}
       title={<span>Everything happening <span className="text-gradient-silver">this year.</span></span>}
-      intro="This is mission control. Every register path across FUNDAZ lands here — flagship and activities route to the official Aaruush portal, while the three domain events take registrations right on this page."
+      intro="This is mission control. Everything happening at FUNDAZ this year — flagship, activities, and all three domain events — lands here."
     >
       {/* Days at a glance */}
       <PageSection data-testid="now-glance">

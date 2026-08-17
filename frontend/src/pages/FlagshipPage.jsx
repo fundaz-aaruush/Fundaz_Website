@@ -30,11 +30,7 @@ export default function FlagshipPage() {
               <span className="col-span-2 inline-flex items-center gap-2.5"><MapPin className="h-4 w-4 text-primary" />{FLAGSHIP.venue}</span>
               <span className="col-span-2 inline-flex items-center gap-2.5"><Trophy className="h-4 w-4 text-primary" />Prize pool {FLAGSHIP.prizePool}</span>
             </div>
-            <Button variant="silver" size="lg" className="mt-8" asChild data-testid="flagship-register-link">
-              <a href={FLAGSHIP.registerUrl} target="_blank" rel="noopener noreferrer">
-                Register on Official Site <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
+
           </motion.div>
         </div>
       </PageSection>
