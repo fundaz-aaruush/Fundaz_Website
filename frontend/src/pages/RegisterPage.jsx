@@ -697,19 +697,13 @@ export function RegNoVerifier({ onGoHome, onScrollToForm }) {
     setError(null);
     setChecking(true);
     try {
-      console.log("Checking regNo:", t);
-      const snap = await getDocs(
+      const checkPromise = getDocs(
         query(collection(db, "users"), where("regNo", "==", t))
       );
-      console.log("Query snap empty?", snap.empty);
-      if (snap.empty) {
-        // Let's also fetch ALL documents just to see what's actually there
-        const allSnap = await getDocs(collection(db, "users"));
-        console.log("Total docs in users:", allSnap.size);
-        allSnap.forEach(doc => {
-          console.log("Found doc:", doc.id, "regNo:", doc.data().regNo, "Length:", doc.data().regNo?.length);
-        });
-      }
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout: Could not reach database. Are you on a restricted Wi-Fi?")), 5000));
+      
+      const snap = await Promise.race([checkPromise, timeoutPromise]);
+      
       setResult(snap.empty ? "not-found" : "found");
       if (!snap.empty) {
         // Auto-redirect home after 2s
@@ -717,7 +711,7 @@ export function RegNoVerifier({ onGoHome, onScrollToForm }) {
       }
     } catch (err) {
       console.error("Lookup error:", err);
-      setError("Connection error — please try again.");
+      setError(err.message.includes("Timeout") ? err.message : "Connection error — please try again.");
     } finally {
       setChecking(false);
     }
