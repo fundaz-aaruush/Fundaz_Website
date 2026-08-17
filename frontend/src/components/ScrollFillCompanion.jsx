@@ -147,6 +147,7 @@ export const ScrollFillCompanion = ({ letterIdx }) => {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [letterIdx, go, next]);
 
   if (!letter) return null;

@@ -241,7 +241,10 @@ export function OnboardingFlow({ onSuccess }) {
     });
 
     setReady(true);
-    return () => gsap.killTweensOf([ballRef.current, glowRef.current, spinRef.current, trail]);
+    const ball = ballRef.current;
+    const glow = glowRef.current;
+    const spinElement = spinRef.current;
+    return () => gsap.killTweensOf([ball, glow, spinElement, trail]);
   }, []);
 
   // Roll ball to next waypoint when step changes
