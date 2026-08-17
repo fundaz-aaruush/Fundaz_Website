@@ -425,6 +425,19 @@ export function OnboardingFlow({ onSuccess }) {
             </filter>
           </defs>
 
+          {/* New Title Added Before Starting */}
+          <foreignObject x="0" y="0" width={VIEW_W} height="80" style={{ overflow: "visible" }}>
+            <div style={{ textAlign: "center", width: "100%", paddingTop: "1rem" }}>
+              <p style={{
+                fontFamily: mono, fontSize: "0.85rem", letterSpacing: "0.4em",
+                textTransform: "uppercase", color: "rgba(255,255,255,0.7)",
+                margin: 0,
+              }}>
+                READY TO HAVE A DEEP DIVE IN FUNDAZ
+              </p>
+            </div>
+          </foreignObject>
+
           {/* Travelling section glow (follows the ball) */}
           <g ref={glowRef}><circle r="340" fill="url(#rp_sectionglow)" /></g>
 
@@ -629,8 +642,8 @@ export function OnboardingFlow({ onSuccess }) {
                 <p style={{ fontFamily: mono, fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem" }}>
                   {submitting ? "Saving to FUNDAZ…" : submitError ? "Error" : "All fields complete"}
                 </p>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: 600, color: submitError ? "#f87171" : "white", margin: 0, marginBottom: "0.5rem" }}>
-                  {submitting ? "Submitting…" : submitError ? "Save Failed ✗" : "Registration submitted ✓"}
+                <h2 style={{ fontSize: "1.2rem", fontWeight: 600, color: submitError ? "#f87171" : "white", margin: 0, marginBottom: "0.5rem" }}>
+                  {submitting ? "Sit tight, be ready for entering the world of fundaz" : submitError ? "Save Failed ✗" : "Registration submitted ✓"}
                 </h2>
                 {submitError && (
                   <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem", maxWidth: "400px", margin: "0 auto" }}>
