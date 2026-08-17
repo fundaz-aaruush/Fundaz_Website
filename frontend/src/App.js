@@ -25,16 +25,17 @@ function App() {
             <Starfield />
             <div className="noise-overlay" />
             <Routes>
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/home" element={<HomePage />} />
+              <Route path="/landing" element={<Landing />} />
               <Route path="/flagship" element={<FlagshipPage />} />
               <Route path="/unearthed" element={<UnearthedPage />} />
               <Route path="/now" element={<NowPage />} />
               <Route path="/domain" element={<DomainPage />} />
               <Route path="/arena" element={<ArenaPage />} />
               <Route path="/zenith"   element={<ZenithPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="*"         element={<Landing />} />
+              <Route path="/secret-register" element={<RegisterPage />} />
+              <Route path="*"         element={<HomePage />} />
             </Routes>
             <Toaster position="bottom-right" richColors />
           </TransitionProvider>
